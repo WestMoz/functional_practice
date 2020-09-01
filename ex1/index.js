@@ -1,6 +1,6 @@
 // ------------ support functions ----------------------
-const compose = require('../utils/compose')
-const curry = require('../utils/curry')
+const compose = require('../utils/compose');
+const curry = require('../utils/curry');
 /**
  * Functional JS Exercises
  *
@@ -18,7 +18,13 @@ const curry = require('../utils/curry')
  * @param {array} items
  * @returns {array}
  */
-const map = null
+const map = curry((f, items) => {
+  let result = [];
+  for (let i = 0; i < items.length; i++) {
+    result.push(f(items[i]));
+  }
+  return result;
+});
 
 /**
  * create a filter function that
@@ -29,7 +35,7 @@ const map = null
  * @param {array} items
  * @returns {array}
  */
-const filter = null
+const filter = curry((f, items) => items.filter(f));
 
 /**
  * create a reduce funtion
@@ -39,25 +45,33 @@ const filter = null
  * @param {array} items
  * @returns {any}
  */
-const reduce = null
+const reduce = curry((reducer, initialValue, items) => {
+  let result = reducer(initialValue, items[0]);
+  for (let i = 1; i < items.length; i++) {
+    result = reducer(result, items[i]);
+  }
+  return result;
+});
 
 /**
  * create a function
  * that converts string
  * to uppercase
  */
-const toUpper = null
+const toUpper = curry((s) => s.toUpperCase());
+//console.log(toUpper()('hello'));
 
 /**
  * create a function
  * that converts string
  * to lowercase
  */
-const toLower = null
+const toLower = curry((s) => s.toLowerCase());
+//console.log(toLower()('HELLO'));
 
 /**
  * create a prop function
- * that will return the 
+ * that will return the
  * value of a key of an object
  *
  * @param {string} key
@@ -65,11 +79,15 @@ const toLower = null
  * @returns {any}
  *
  */
-const prop = null
+const prop = curry((key, obj) => obj[key]);
+let testObj = {
+  a: 'aVal',
+};
+//console.log(prop('a')(testObj));
 
-/** 
+/**
  * create a equals function
- * that will return true if 
+ * that will return true if
  * both values are equal
  * or false if both are not
  * equal
@@ -78,7 +96,8 @@ const prop = null
  * @param {any} b
  * @returns {boolean}
  */
-const equals = null
+const equals = curry((a, b) => a === b);
+//console.log(equals(2)(2));
 
 /**
  * create a propEq function
@@ -89,20 +108,23 @@ const equals = null
  *
  * @param {string} key
  * @param {any} value
- * @param {object} obj 
+ * @param {object} obj
  * @returns {boolean}
  */
-const propEq = null
-
+// const propEq = curry((key, value, obj) => obj[key] === value);
+const propEq = curry((key, value, obj) =>
+  compose(equals(value), prop(key))(obj),
+);
+//console.log(propEq('a', 'aVal', testObj));
 
 /**
  * create a function called
- * path that takes an 
- * array of keys and 
+ * path that takes an
+ * array of keys and
  * an object that
  * this function tries to
- * extract the value of the 
- * nested object 
+ * extract the value of the
+ * nested object
  *
  * path(['a','b','c'],{a:{b:{c: "hello"}}}) === "hello"
  *
@@ -111,16 +133,41 @@ const propEq = null
  * @returns {any}
  *
  */
-const path = null
+const group = {
+  dogs: [
+    {
+      name: 'ribbons',
+    },
+  ],
+};
+const path = curry((keys, obj) =>
+  reduce((o, value) => prop(value, o), obj, keys),
+);
+
+//console.log(path(['dogs', 0, 'name'], group));
 
 /**
- * create pathEq 
+ * create pathEq
  *
  * @param {array} keys
  * @param {any} value
  * @param {object} obj
  * @returns {boolean}
  */
-const pathEq = null
+const pathEq = curry((keys, value, obj) =>
+  compose(equals(value), path(keys))(obj),
+);
 
-module.exports = {map, filter, reduce, toUpper, toLower, prop, equals, propEq, path}
+//console.log(pathEq(['dogs', '0', 'name'], 'ribbons', group));
+
+module.exports = {
+  map,
+  filter,
+  reduce,
+  toUpper,
+  toLower,
+  prop,
+  equals,
+  propEq,
+  path,
+};
